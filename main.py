@@ -8,12 +8,12 @@ from colorama import *
 init(autoreset=True)
 
 load_dotenv()
-token = os.getenv("TOKEN")
+tokens_str = os.getenv("TOKEN")
+tokens = [t.strip() for t in tokens_str.split(',') if t.strip()]
 
 url = "https://auth.ddai.network/modelResponse"
-headers = {
+headers_template = {
     "Accept": "application/json, text/plain, */*",
-    "Authorization": f"Bearer {token}",
     "Referer": "https://auth.ddai.network/",
     "Sec-Ch-Ua": '"Chromium";v="136", "Google Chrome";v="136", "Not.A/Brand";v="99"',
     "Sec-Ch-Ua-Mobile": "?0",
@@ -25,28 +25,45 @@ def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 while True:
-    try:
-        response = requests.get(url, headers=headers)
-        data = response.json()
+    all_accounts_data = []
+    for i, token in enumerate(tokens):
+        headers = headers_template.copy()
+        headers["Authorization"] = f"Bearer {token}"
 
-        throughput = data.get("data", {}).get("throughput", "N/A")
-        status = data.get("status", "N/A")
-        error = data.get("error", {})
+        try:
+            response = requests.get(url, headers=headers)
+            data = response.json()
 
-        status_colored = Fore.GREEN + status if status == "success" else Fore.RED + status
-        error_colored = Fore.RED + str(error) if error else Fore.GREEN + "{}"
+            throughput = data.get("data", {}).get("throughput", "N/A")
+            status = data.get("status", "N/A")
+            error = data.get("error", {})
 
-        table = [
-            ["Time", time.strftime("%Y-%m-%d %H:%M:%S")],
-            ["Status", status_colored],
-            ["Throughput", throughput],
-            ["Error", error_colored]
-        ]
+            status_colored = Fore.GREEN + status if status == "success" else Fore.RED + status
+            error_colored = Fore.RED + str(error) if error else Fore.GREEN + "{}"
 
-        clear_screen()
-        print(tabulate(table, headers=["Field", "Value"], tablefmt="grid"))
+            all_accounts_data.append([
+                f"Account {i+1} - Time", time.strftime("%Y-%m-%d %H:%M:%S"),
+                f"Account {i+1} - Status", status_colored,
+                f"Account {i+1} - Throughput", throughput,
+                f"Account {i+1} - Error", error_colored
+            ])
 
-    except Exception as e:
-        print(Fore.RED + f"Error: {e}")
+        except Exception as e:
+            all_accounts_data.append([
+                f"Account {i+1} - Time", time.strftime("%Y-%m-%d %H:%M:%S"),
+                f"Account {i+1} - Status", Fore.RED + "Error",
+                f"Account {i+1} - Throughput", "N/A",
+                f"Account {i+1} - Error", Fore.RED + f"{e}"
+            ])
+            print(Fore.RED + f"Error for Account {i+1}: {e}")
+
+    clear_screen()
+    
+    flattened_data = []
+    for account_data in all_accounts_data:
+        for j in range(0, len(account_data), 2):
+            flattened_data.append([account_data[j], account_data[j+1]])
+
+    print(tabulate(flattened_data, headers=["Field", "Value"], tablefmt="grid"))
 
     time.sleep(1)
