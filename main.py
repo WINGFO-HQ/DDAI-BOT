@@ -25,6 +25,11 @@ def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 while True:
+    clear_screen()
+    
+    print(Fore.CYAN + Style.BRIGHT + "DDAI Network BOT")
+    print(Fore.CYAN + Style.BRIGHT + "https://t.me/infomindao")
+
     all_accounts_data = []
     for i, token in enumerate(tokens):
         headers = headers_template.copy()
@@ -56,8 +61,6 @@ while True:
                 f"Account {i+1} - Error", Fore.RED + f"{e}"
             ])
             print(Fore.RED + f"Error for Account {i+1}: {e}")
-
-    clear_screen()
     
     flattened_data = []
     for account_data in all_accounts_data:
