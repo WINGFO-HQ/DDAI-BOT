@@ -1,0 +1,4 @@
+tabulate
+colorama
+requests
+python-dotenv
