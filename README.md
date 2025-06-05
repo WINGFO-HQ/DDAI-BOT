@@ -27,7 +27,7 @@ pip install -r requirements.txt
 
 ## Setup
 
-1.  **Clone the repository (or download the files):**
+1.  **Clone the repository:**
 
     ```bash
     git clone https://github.com/WINGFO-HQ/DDAI-BOT.git
